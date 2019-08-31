@@ -1,5 +1,5 @@
 #nsml: nsml/ml:cuda9.0-cudnn7-tf-1.11torch1.0keras2.2
-
+# PyTorch version - 1.1.0
 from distutils.core import setup
 setup(
     name='airush1',
@@ -10,6 +10,5 @@ setup(
             'pickle-mixin',
             'torchvision',
             'pandas',
-
     ]
 )

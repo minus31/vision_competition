@@ -10,7 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
 from nsml import DATASET_PATH
 
-def train_dataloader(input_size=128,
+def train_dataloader(input_size=224,
                     batch_size=64,
                     num_workers=0,
                     ):
@@ -19,15 +19,30 @@ def train_dataloader(input_size=128,
     train_label_path = os.path.join(DATASET_PATH, 'train', 'train_label') 
     train_meta_path = os.path.join(DATASET_PATH, 'train', 'train_data', 'train_with_valid_tags.csv')
     train_meta_data = pd.read_csv(train_meta_path, delimiter=',', header=0)
-        
+
+    # transform = transforms.Compose([
+    #     transforms.RandomResizedCrop(size=224, scale=(0.8, 1.0)),
+    #     transforms.RandomHorizontalFlip(p=0.5),
+    #     transforms.RandomVerticalFlip(p=0.5),
+    #     transforms.ToTensor(),
+    #     transforms.Normalize(mean=[0.485, 0.456, 0.406],
+    #                          std=[0.229, 0.224, 0.225])
+    # ])
+    transform = transforms.Compose([transforms.Resize((input_size, input_size)), 
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+
     dataloader = DataLoader(
         AIRushDataset(image_dir, train_meta_data, label_path=train_label_path, 
-                      transform=transforms.Compose([transforms.Resize((input_size, input_size)), transforms.ToTensor()])),
+                      transform=transform),
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
         pin_memory=True)
     return dataloader
+
+def get_random_idx(x):
+    return np.random.choice(np.argwhere(x == 1.0).reshape(-1), 1)[0]
 
 
 class AIRushDataset(Dataset):
@@ -55,7 +70,8 @@ class AIRushDataset(Dataset):
             new_img = self.transform(new_img)
         
         if self.label_path is not None:
-            tags = torch.tensor(np.argmax(self.label_matrix[idx])) # here, we will use only one label among multiple labels.
+            tags = torch.tensor(get_random_idx(self.label_matrix[idx]))
+            # tags = torch.tensor(np.argmax(self.label_matrix[idx])) # here, we will use only one label among multiple labels.
             return new_img, tags
         else:
             return new_img

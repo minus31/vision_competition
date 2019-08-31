@@ -1,5 +1,25 @@
 # LINE sticker Image Classification
 
+### Test Log 
+
+ - ResNet152 with baseline code 
+ - DenseNet169 with baseline code 
+ - randomly choose a label from multiples 
+ - adam with amsgrad = True
+ - add simple data augmentation 
+    - resize and crop 
+    - horizontal filp
+    - vertical filp
+    - to tensor 
+    - normalize
+
+ - 기훈 : ResNet152 : label with np.argmax : transform.random_affine
+ - 현규 : DenseNet169 : label with get_random_label : , 
+----
+##### 8/12 
+
+ - eliminate augmentation 
+
 ### 1. Usage
 
 #### How to run

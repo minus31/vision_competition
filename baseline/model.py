@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
+from efficientnet_pytorch import EfficientNet
 
 
 class Baseline(nn.Module):
@@ -32,7 +33,12 @@ class Baseline(nn.Module):
 class Resnet(nn.Module):
     def __init__(self, out_size):
         super().__init__()
-        model = models.resnet18(pretrained=True)
+        # model = models.resnet18(pretrained=True)
+        model = models.densenet161(pretrained=True)
+
+        for param in model.parameters():
+            param.requires_grad = False
+
         model = list(model.children())[:-1]
         model.append(nn.Conv2d(512, out_size, 1))
         self.net = nn.Sequential(*model)
@@ -40,3 +46,53 @@ class Resnet(nn.Module):
     def forward(self, image):
         return self.net(image).squeeze(-1).squeeze(-1)
 
+
+class DenseNet(nn.Module):
+    def __init__(self, out_size):
+        super().__init__()
+        model = models.densenet161(pretrained=True)
+
+        for param in model.parameters():
+            param.requires_grad = False
+
+        model = list(model.children())[:-1]
+        model.append(nn.Conv2d(2208, out_size, 7))
+        self.net = nn.Sequential(*model)
+
+    def forward(self, image):
+        return self.net(image).squeeze(-1).squeeze(-1)
+
+from efficientnet_pytorch import EfficientNet
+
+
+# class Efficientnet(nn.Module):
+#     def __init__(self, out_size):
+#         super().__init__()
+#         self.model = EfficientNet.from_pretrained('efficientnet-b7')
+        
+#         for param in self.model.parameters():
+#             param.requires_grad = False
+        
+#     def forward(self, image):
+    
+#         f = self.model.extract_features(image)
+#         conv = nn.Conv2d(2560, 350, 7).cuda()
+#         f = conv(f)
+
+#         return f.squeeze(-1).squeeze(-1)
+
+#############################################
+# no update extractor and add FCN at the last 
+
+class Efficientnet(nn.Module):
+
+    def __init__(self, out_size):
+        super().__init__()
+        self.model = EfficientNet.from_pretrained('efficientnet-b7')
+        
+        # for param in self.model.parameters():
+        #     param.requires_grad = False
+        self.model._fc = nn.Linear(2560, 350)
+        
+    def forward(self, image):
+        return self.model(image)

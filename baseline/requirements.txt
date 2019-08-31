@@ -3,3 +3,4 @@ pickle-mixin
 tqdm
 torchvision
 pandas
+efficientnet_pytorch
